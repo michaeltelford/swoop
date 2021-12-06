@@ -3,6 +3,7 @@ package swoop
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	pkgPages "github.com/michaeltelford/swoop/pages"
@@ -45,7 +46,7 @@ func registerPage(mux *http.ServeMux, page pkgPages.IPage) {
 
 func respondWithPageContent(w http.ResponseWriter, page pkgPages.IPage) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(page.Content())))
+	w.Header().Set("Content-Length", strconv.Itoa(len(page.Content())))
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(page.Content()))
