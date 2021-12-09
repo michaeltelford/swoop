@@ -1,58 +1,53 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
-	pkgPages "github.com/michaeltelford/swoop/page"
+	pkgPage "github.com/michaeltelford/swoop/page"
+	pkgMiddleware "github.com/michaeltelford/swoop/server/middleware"
 )
 
-func NewServer(address string, pages []pkgPages.IPage) *http.Server {
+func NewServer(address string, pages []pkgPage.IPage) *http.Server {
 	mux := NewMux(pages)
 
 	return &http.Server{
 		Addr:         address,
-		Handler:      mux,
+		Handler:      buildMiddleware(mux),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,
 	}
 }
 
-func NewMux(pages []pkgPages.IPage) *http.ServeMux {
+func NewMux(pages []pkgPage.IPage) *http.ServeMux {
 	mux := http.NewServeMux()
 	registerPages(mux, pages)
 
 	return mux
 }
 
-func registerPages(mux *http.ServeMux, pages []pkgPages.IPage) {
+func registerPages(mux *http.ServeMux, pages []pkgPage.IPage) {
 	for _, page := range pages {
 		registerPage(mux, page)
 	}
 }
 
-func registerPage(mux *http.ServeMux, page pkgPages.IPage) {
+func registerPage(mux *http.ServeMux, page pkgPage.IPage) {
 	mux.HandleFunc(page.Route(), func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
-			respondWithPageContent(w, page)
-		} else {
-			respondWithMethodNotAllowed(w)
-		}
+		respondWithContent(w, page.Content())
 	})
 }
 
-func respondWithPageContent(w http.ResponseWriter, page pkgPages.IPage) {
+func respondWithContent(w http.ResponseWriter, content string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Content-Length", strconv.Itoa(len(page.Content())))
-
+	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
+	w.Header().Set("X-Status-Code", "200")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(page.Content()))
+	w.Write([]byte(content))
 }
 
-func respondWithMethodNotAllowed(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	w.Write([]byte(fmt.Sprintf("%d method not allowed", http.StatusMethodNotAllowed)))
+func buildMiddleware(mux *http.ServeMux) http.Handler {
+	return pkgMiddleware.Logger(pkgMiddleware.HTTPMethod(mux))
 }
