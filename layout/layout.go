@@ -1,18 +1,31 @@
 package layout
 
 import (
-	"fmt"
 	"html/template"
 	"log"
-	"time"
 )
 
-var templates *template.Template
+var (
+	templates *template.Template
+)
+
+type (
+	ILayout interface {
+		Template() *template.Template
+		Context() map[string]string
+	}
+
+	Layout struct {
+		template *template.Template
+		context  map[string]string
+	}
+)
 
 // Expected directory structure: templates/layouts and templates/components.
 func init() {
 	init_layouts()
 	init_components()
+	addInlineTemplate()
 }
 
 func init_layouts() {
@@ -31,43 +44,14 @@ func init_components() {
 	}
 }
 
-type ILayout interface {
-	Template() *template.Template
-	Context() map[string]string
-}
-
-type Layout struct {
-	template *template.Template
-	context  map[string]string
-}
-
-func PrintTemplates() {
-	log.Default().Println(templates.DefinedTemplates())
-}
-
-func AddTemplateFromFilepath(filepath string) {
-	var err error
-	templates, err = templates.ParseFiles(filepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func AddTemplateFromString(inline string) {
-	name := fmt.Sprintf("%d", time.Now().Unix())
-	content := fmt.Sprintf(`{{define "content"}}%s{{end}}`, inline)
+func addInlineTemplate() {
+	name := "inline_content"
+	content := `{{define "content"}}{{.inline_content}}{{end}}`
 
 	var err error
 	templates, err = templates.New(name).Parse(content)
 	if err != nil {
 		log.Fatal(err)
-	}
-}
-
-func NewLayout(template_name string, ctx map[string]string) *Layout {
-	return &Layout{
-		template: templates.Lookup(template_name),
-		context:  ctx,
 	}
 }
 
@@ -77,4 +61,15 @@ func (l *Layout) Template() *template.Template {
 
 func (l *Layout) Context() map[string]string {
 	return l.context
+}
+
+func NewLayout(template_name string, ctx map[string]string) *Layout {
+	return &Layout{
+		template: templates.Lookup(template_name),
+		context:  ctx,
+	}
+}
+
+func PrintTemplates() {
+	log.Default().Println(templates.DefinedTemplates())
 }
