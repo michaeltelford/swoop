@@ -51,18 +51,18 @@ func registerPage(mux *http.ServeMux, page pkgPage.IPage) {
 }
 
 func respondWithContent(w http.ResponseWriter, content template.HTML) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
-	w.Header().Set("X-Status-Code", strconv.Itoa(http.StatusOK))
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(content))
+	respond(w, http.StatusOK, string(content))
 }
 
 func respondWithMethodNotAllowed(w http.ResponseWriter) {
 	content := fmt.Sprintf("%d method not allowed", http.StatusMethodNotAllowed)
+	respond(w, http.StatusMethodNotAllowed, content)
+}
+
+func respond(w http.ResponseWriter, status int, content string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
-	w.Header().Set("X-Status-Code", strconv.Itoa(http.StatusMethodNotAllowed))
-	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.Header().Set("X-Status-Code", strconv.Itoa(status))
+	w.WriteHeader(status)
 	w.Write([]byte(content))
 }
