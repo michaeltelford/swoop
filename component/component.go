@@ -40,14 +40,7 @@ func (c *Component) Content() template.HTML {
 	return pkgLayout.ParseTemplate(c.Template(), c.Context())
 }
 
-func NewComponent(name, template string) *Component {
-	ctx := map[string]interface{}{
-		"posts": []struct{ Title string }{
-			{"My first post yay :-)"},
-			{"My second post!"},
-		},
-	}
-
+func NewComponent(name, template string, ctx map[string]interface{}) *Component {
 	return &Component{
 		name:         name,
 		templateName: template,
