@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -29,6 +30,10 @@ func NewMux(pages []pkgPage.IPage) *http.ServeMux {
 	return mux
 }
 
+func buildMiddleware(mux *http.ServeMux) http.Handler {
+	return pkgMiddleware.Logger(mux)
+}
+
 func registerPages(mux *http.ServeMux, pages []pkgPage.IPage) {
 	for _, page := range pages {
 		registerPage(mux, page)
@@ -37,18 +42,27 @@ func registerPages(mux *http.ServeMux, pages []pkgPage.IPage) {
 
 func registerPage(mux *http.ServeMux, page pkgPage.IPage) {
 	mux.HandleFunc(page.Route(), func(w http.ResponseWriter, r *http.Request) {
-		respondWithContent(w, page.Content())
+		if r.Method == page.Method() {
+			respondWithContent(w, page.Content())
+		} else {
+			respondWithMethodNotAllowed(w)
+		}
 	})
 }
 
 func respondWithContent(w http.ResponseWriter, content template.HTML) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
-	w.Header().Set("X-Status-Code", "200")
+	w.Header().Set("X-Status-Code", strconv.Itoa(http.StatusOK))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(content))
 }
 
-func buildMiddleware(mux *http.ServeMux) http.Handler {
-	return pkgMiddleware.Logger(pkgMiddleware.HTTPMethod(mux))
+func respondWithMethodNotAllowed(w http.ResponseWriter) {
+	content := fmt.Sprintf("%d method not allowed", http.StatusMethodNotAllowed)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
+	w.Header().Set("X-Status-Code", strconv.Itoa(http.StatusMethodNotAllowed))
+	w.WriteHeader(http.StatusMethodNotAllowed)
+	w.Write([]byte(content))
 }

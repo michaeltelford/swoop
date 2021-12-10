@@ -10,18 +10,24 @@ import (
 
 type (
 	IPage interface {
+		Method() string            // GET, POST, etc.
 		Route() string             // The page URL path e.g. "/foo/bar"
 		Layout() *pkgLayout.Layout // The layout to use for the page
 		Content() template.HTML    // The content of the page
 	}
 
 	Page struct {
+		method        string
 		route         string
 		layout        *pkgLayout.Layout
 		inlineContent template.HTML
 		components    []pkgComponent.IComponent
 	}
 )
+
+func (p *Page) Method() string {
+	return p.method
+}
 
 func (p *Page) Route() string {
 	return p.route
@@ -49,16 +55,18 @@ func (p *Page) Content() template.HTML {
 	return pkgLayout.ParseTemplate(p.layout.Template(), ctx)
 }
 
-func NewPageFromString(route string, layout *pkgLayout.Layout, content template.HTML) *Page {
+func NewPageFromString(method, route string, layout *pkgLayout.Layout, content template.HTML) *Page {
 	return &Page{
+		method:        method,
 		route:         route,
 		layout:        layout,
 		inlineContent: content,
 	}
 }
 
-func NewPageFromComponents(route string, layout *pkgLayout.Layout, components []pkgComponent.IComponent) *Page {
+func NewPageFromComponents(method, route string, layout *pkgLayout.Layout, components []pkgComponent.IComponent) *Page {
 	return &Page{
+		method:     method,
 		route:      route,
 		layout:     layout,
 		components: components,
