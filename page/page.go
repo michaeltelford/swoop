@@ -1,26 +1,25 @@
 package page
 
 import (
-	"bytes"
 	"html/template"
 	"log"
 
-	pkgComponents "github.com/michaeltelford/swoop/component"
-	pkgLayouts "github.com/michaeltelford/swoop/layout"
+	pkgComponent "github.com/michaeltelford/swoop/component"
+	pkgLayout "github.com/michaeltelford/swoop/layout"
 )
 
 type (
 	IPage interface {
-		Route() string              // The page URL path e.g. "/foo/bar"
-		Layout() *pkgLayouts.Layout // The layout to use for the page
-		Content() string            // The content of the page
+		Route() string             // The page URL path e.g. "/foo/bar"
+		Layout() *pkgLayout.Layout // The layout to use for the page
+		Content() template.HTML    // The content of the page
 	}
 
 	Page struct {
 		route          string
-		layout         *pkgLayouts.Layout
+		layout         *pkgLayout.Layout
 		inline_content string
-		components     []pkgComponents.IComponent
+		components     []pkgComponent.IComponent
 	}
 )
 
@@ -28,35 +27,29 @@ func (p *Page) Route() string {
 	return p.route
 }
 
-func (p *Page) Layout() *pkgLayouts.Layout {
+func (p *Page) Layout() *pkgLayout.Layout {
 	return p.layout
 }
 
-func (p *Page) Content() string {
-	var content string
+func (p *Page) Content() template.HTML {
+	ctx := p.layout.Context()
 
 	if p.inline_content != "" {
-		ctx := p.layout.Context()
-		ctx["inline_content"] = p.inline_content
-		content = parseTemplate(p.layout.Template(), ctx)
-	} else if p.components != nil {
-		log.Fatal("TODO: Page.Content() called on page with components but no content")
+		ctx["content"] = p.inline_content
+	} else if len(p.components) > 0 {
+		var componentContent template.HTML
+		for _, component := range p.components {
+			componentContent += component.Content()
+		}
+		ctx["content"] = componentContent
 	} else {
 		log.Fatal("No content or components to render")
 	}
 
-	return content
+	return pkgLayout.ParseTemplate(p.layout.Template(), ctx)
 }
 
-func parseTemplate(tmpl *template.Template, ctx map[string]string) string {
-	var buffer bytes.Buffer
-	if err := tmpl.Execute(&buffer, ctx); err != nil {
-		log.Fatal(err)
-	}
-	return buffer.String()
-}
-
-func NewPageFromString(route string, layout *pkgLayouts.Layout, content string) *Page {
+func NewPageFromString(route string, layout *pkgLayout.Layout, content string) *Page {
 	return &Page{
 		route:          route,
 		layout:         layout,
@@ -64,7 +57,7 @@ func NewPageFromString(route string, layout *pkgLayouts.Layout, content string) 
 	}
 }
 
-func NewPageFromComponents(route string, layout *pkgLayouts.Layout, components []pkgComponents.IComponent) *Page {
+func NewPageFromComponents(route string, layout *pkgLayout.Layout, components []pkgComponent.IComponent) *Page {
 	return &Page{
 		route:      route,
 		layout:     layout,

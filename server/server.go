@@ -1,6 +1,7 @@
 package server
 
 import (
+	"html/template"
 	"net/http"
 	"strconv"
 	"time"
@@ -40,7 +41,7 @@ func registerPage(mux *http.ServeMux, page pkgPage.IPage) {
 	})
 }
 
-func respondWithContent(w http.ResponseWriter, content string) {
+func respondWithContent(w http.ResponseWriter, content template.HTML) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
 	w.Header().Set("X-Status-Code", "200")
