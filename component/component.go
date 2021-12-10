@@ -41,13 +41,16 @@ func (c *Component) Content() template.HTML {
 }
 
 func NewComponent(name, template string) *Component {
-	posts := map[string]interface{}{
-		"posts": []struct{ Title string }{{"My first post yay :-)"}},
+	ctx := map[string]interface{}{
+		"posts": []struct{ Title string }{
+			{"My first post yay :-)"},
+			{"My second post!"},
+		},
 	}
 
 	return &Component{
 		name:         name,
 		templateName: template,
-		context:      posts,
+		context:      ctx,
 	}
 }

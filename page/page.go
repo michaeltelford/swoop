@@ -16,10 +16,10 @@ type (
 	}
 
 	Page struct {
-		route          string
-		layout         *pkgLayout.Layout
-		inline_content string
-		components     []pkgComponent.IComponent
+		route         string
+		layout        *pkgLayout.Layout
+		inlineContent template.HTML
+		components    []pkgComponent.IComponent
 	}
 )
 
@@ -34,8 +34,8 @@ func (p *Page) Layout() *pkgLayout.Layout {
 func (p *Page) Content() template.HTML {
 	ctx := p.layout.Context()
 
-	if p.inline_content != "" {
-		ctx["content"] = p.inline_content
+	if p.inlineContent != "" {
+		ctx["content"] = p.inlineContent
 	} else if len(p.components) > 0 {
 		var componentContent template.HTML
 		for _, component := range p.components {
@@ -49,11 +49,11 @@ func (p *Page) Content() template.HTML {
 	return pkgLayout.ParseTemplate(p.layout.Template(), ctx)
 }
 
-func NewPageFromString(route string, layout *pkgLayout.Layout, content string) *Page {
+func NewPageFromString(route string, layout *pkgLayout.Layout, content template.HTML) *Page {
 	return &Page{
-		route:          route,
-		layout:         layout,
-		inline_content: content,
+		route:         route,
+		layout:        layout,
+		inlineContent: content,
 	}
 }
 

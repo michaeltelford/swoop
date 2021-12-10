@@ -24,12 +24,12 @@ type (
 
 // Expected directory structure: templates/layouts and templates/components.
 func init() {
-	init_layouts()
-	init_components()
+	initLayouts()
+	initComponents()
 	addInlineTemplate()
 }
 
-func init_layouts() {
+func initLayouts() {
 	var err error
 	templates, err = templates.ParseGlob("templates/layouts/*")
 	if err != nil {
@@ -37,7 +37,7 @@ func init_layouts() {
 	}
 }
 
-func init_components() {
+func initComponents() {
 	var err error
 	templates, err = templates.ParseGlob("templates/components/*")
 	if err != nil {
@@ -46,7 +46,7 @@ func init_components() {
 }
 
 func addInlineTemplate() {
-	name := "inline_content"
+	name := "inlineContent"
 	content := `{{.content}}`
 
 	var err error
@@ -64,16 +64,16 @@ func (l *Layout) Context() map[string]interface{} {
 	return l.context
 }
 
-func NewLayout(template_name string, ctx map[string]interface{}) *Layout {
+func NewLayout(templateName string, ctx map[string]interface{}) *Layout {
 	return &Layout{
-		template: templates.Lookup(template_name),
+		template: templates.Lookup(templateName),
 		context:  ctx,
 	}
 }
 
 func NewLayoutFromLayout(layout *Layout, ctx map[string]interface{}) *Layout {
-	merged_ctx := MergeContexts(layout.Context(), ctx)
-	return NewLayout(layout.Template().Name(), merged_ctx)
+	mergedCtx := MergeContexts(layout.Context(), ctx)
+	return NewLayout(layout.Template().Name(), mergedCtx)
 }
 
 func PrintTemplates() {
@@ -94,14 +94,14 @@ func ParseTemplate(tmpl *template.Template, ctx map[string]interface{}) template
 
 // Merge two maps, overwriting values in the first map with values from the second.
 func MergeContexts(ctx1, ctx2 map[string]interface{}) map[string]interface{} {
-	new_ctx := make(map[string]interface{})
+	mergedCtx := make(map[string]interface{})
 
 	for k, v := range ctx1 {
-		new_ctx[k] = v
+		mergedCtx[k] = v
 	}
 	for k, v := range ctx2 {
-		new_ctx[k] = v
+		mergedCtx[k] = v
 	}
 
-	return new_ctx
+	return mergedCtx
 }
