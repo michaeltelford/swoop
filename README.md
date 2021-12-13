@@ -7,12 +7,10 @@ Swoop is a small, minimalist and lightweight golang library designed for removin
 Swoop doesn't reinvent the wheel, instead the Golang stdlib is used where ever possible. For example:
 
 - HTTP -> `net/http`
-- Views -> `template/html`
+- Views -> `html/template`
 - Data Model -> `map[string]interface{}` acting as context for your views
 
-### Concepts
-
-#### Reading Data
+## Concepts
 
 There is only one type in Swoop that produces HTML for the user to view, a `Page`. A page is made up of the following structure:
 
@@ -26,7 +24,9 @@ A layout is a `html/template` used to define everything around the page content.
 
 Each component is a `html/template` and can be passed a context (of `map[string]interface{}`) making it accessible from within the template. Components are reusable across any number of Pages. Components should be stored at the root of the project in `templates/components`.
 
-### Usage
+Swoop doesn't concern itself with how you model or access your data, it just provides a simple way to render your data as HTML. The use of Databases etc. is not required to use Swoop. You can use any data you want to render as HTML by passing it to the `map[string]interface{}` context of a component.
+
+## Usage
 
 Check out this demo application as an example of how Swoop can be used:
 
