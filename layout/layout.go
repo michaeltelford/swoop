@@ -77,7 +77,7 @@ func NewLayoutFromLayout(layout *Layout, ctx map[string]interface{}) *Layout {
 }
 
 func PrintTemplates() {
-	log.Default().Println(templates.DefinedTemplates())
+	log.Println(templates.DefinedTemplates())
 }
 
 func LookupTemplate(name string) *template.Template {
